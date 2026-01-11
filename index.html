@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>RightClick Acknowledgement</title>
   <link rel="stylesheet" href="style.css">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
@@ -11,44 +11,54 @@
   <h2>RightClick Computer Sales & Service Center</h2>
   <p>Customer Job Acknowledgement</p>
 
-  <form>
-
+  <!-- MAIN FORM -->
   <form id="jobForm">
 
-  <label>Customer Name</label>
-  <input type="text" id="customerName" required>
+    <label>Customer Name</label>
+    <input type="text" id="customerName" required>
 
-  <label>Mobile Number</label>
-  <input type="tel" id="mobile" required>
+    <label>Mobile Number</label>
+    <input type="tel" id="mobile" required>
 
-  <label>Item Submitted</label>
-  <select id="item">
-    <option>Laptop</option>
-    <option>Desktop / CPU</option>
-    <option>Printer</option>
-    <option>Monitor</option>
-    <option>UPS</option>
-    <option>Other</option>
-  </select>
+    <label>Item Submitted</label>
+    <select id="item" required>
+      <option value="">-- Select Item --</option>
+      <option>Laptop</option>
+      <option>Desktop / CPU</option>
+      <option>Printer</option>
+      <option>Monitor</option>
+      <option>UPS</option>
+      <option>Other</option>
+    </select>
 
-  <h4>Accessories Received</h4>
+    <h4>Accessories Received</h4>
+    <label>
+      <input type="checkbox" id="accAdapter"> Adapter
+    </label><br>
 
-  <label><input type="checkbox" id="adapter"> Adapter</label><br>
-  <label><input type="checkbox" id="power"> Power Cable</label><br>
-  <label><input type="checkbox" id="hdmi"> HDMI / VGA Cable</label><br>
-  <label><input type="checkbox" id="mouse"> Mouse</label><br>
-  <label><input type="checkbox" id="keyboard"> Keyboard</label>
+    <label>
+      <input type="checkbox" id="accCable"> Power Cable
+    </label><br>
 
-  <label>Other Items (if any)</label>
-  <input type="text" id="otherItems">
+    <label>
+      <input type="checkbox" id="accBag"> HDMI / VGA Cable
+    </label><br>
 
-  <label>Problem Reported</label>
-  <textarea id="problem" rows="4"></textarea>
+    <label>Other Items (if any)</label>
+    <input type="text" id="accOther" placeholder="Eg: Mouse, Keyboard, Bag">
 
-  <button type="submit">Generate Acknowledgement</button>
+    <label>Problem Reported</label>
+    <textarea id="problem" rows="4" required></textarea>
 
-</form>
+    <label>Received By (Signature / Staff Name)</label>
+    <input type="text" id="signature" required>
 
-<script type="module" src="script.js"></script>
+    <button type="submit">Generate Acknowledgement</button>
+
+  </form>
+
+  <!-- Firebase connected JS -->
+  <script type="module" src="script.js"></script>
+
 </body>
 </html>
