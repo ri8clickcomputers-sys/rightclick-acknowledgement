@@ -2,7 +2,14 @@ alert("Script.js loaded");
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-const firebaseConfig = { /* your config - keep same */ };
+const firebaseConfig = {
+  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+  authDomain: "rightclick-service-center.firebaseapp.com",
+  projectId: "rightclick-service-center",
+  storageBucket: "rightclick-service-center.firebasestorage.app",
+  messagingSenderId: "558210394752",
+  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -39,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         signature
       });
 
-      // Build accessories string for print & WA
+      // Accessories string for print/WA
       let accList = [];
       if (accessories.adapter) accList.push("Adapter");
       if (accessories.cable) accList.push("Power Cable");
@@ -47,24 +54,23 @@ document.addEventListener("DOMContentLoaded", () => {
       if (accessories.other) accList.push(accessories.other);
       const accString = accList.length ? accList.join(", ") : "None";
 
-      // Printable slip
+      // Printable acknowledgement slip
       const printContent = `
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Acknowledgement - ${jobId}</title>
+  <title>${jobId} - RightClick</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 30px; max-width: 800px; margin: auto; line-height: 1.6; }
+    body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: auto; line-height: 1.8; }
     h2 { text-align: center; color: #003366; }
     .label { font-weight: bold; }
-    hr { margin: 20px 0; }
-    ul { margin-left: 20px; }
-    @media print { button { display: none; } }
+    hr { margin: 30px 0; border: 1px solid #ccc; }
+    @media print { .no-print { display: none; } }
   </style>
 </head>
 <body>
   <h2>RightClick Computer Sales & Service Center</h2>
-  <p style="text-align:center;">[Shop Address, Visakhapatnam]<br>Mobile: [Your Number]<br>Email: [email]</p>
+  <p style="text-align:center;">Visakhapatnam<br>Contact: 9059895427</p>
   <hr>
   <h3>Customer Acknowledgement Receipt</h3>
   <p><span class="label">Job ID:</span> ${jobId}</p>
@@ -76,23 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
   <p><span class="label">Problem:</span> ${problem}</p>
   <p><span class="label">Received By:</span> ${signature}</p>
   <hr>
-  <p><strong>Terms & Conditions:</strong></p>
-  <ul>
-    <li>Backup your data - we are not responsible for data loss.</li>
-    <li>Estimated time will be informed later.</li>
-    <li>Warranty on repairs as per policy.</li>
-    <li>Please quote Job ID for enquiries.</li>
-  </ul>
-  <p style="text-align:center; margin-top:30px;">Thank you for choosing RightClick!</p>
-  <div style="text-align:center; margin-top:30px;">
-    <button onclick="window.print()" style="padding:15px 30px; font-size:18px; background:#003366; color:white; border:none;">Print Receipt</button>
+  <p><strong>Terms:</strong> Data backup is customer's responsibility. Quote Job ID for updates.</p>
+  <div style="text-align:center; margin:40px 0;" class="no-print">
+    <button onclick="window.print()" style="padding:15px 30px; font-size:18px; background:#003366; color:white; border:none; border-radius:8px;">Print Receipt</button>
   </div>
 </body>
 </html>`;
       const printWin = window.open('', '_blank');
       printWin.document.write(printContent);
       printWin.document.close();
-      printWin.focus();
 
       // WhatsApp to customer
       let customerNumber = mobile;
@@ -109,11 +107,11 @@ Problem: ${problem}
 We will update you soon.`);
       window.open(`https://wa.me/${customerNumber}?text=${waMessage}`, "_blank");
 
-      alert(`Success! Job ID: ${jobId}\nPrint window opened.`);
+      alert(`Success! Job ID: ${jobId}\nPrint the receipt from the new window.`);
       form.reset();
     } catch (error) {
       console.error(error);
-      alert("Error - check console.");
+      alert("Error saving job. Check internet/console.");
     }
   });
 });
