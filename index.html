@@ -1,64 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>RightClick Acknowledgement</title>
-  <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RightClick Customer Acknowledgement</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
+  body { background-color: #f5f8fb; color: #333; }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #003366;
+    padding: 20px;
+    color: #fff;
+    flex-wrap: wrap;
+  }
+  header img { height: 60px; margin-right: 20px; }
+  header div { text-align: center; }
+  header h1 { margin-bottom: 5px; font-size: 24px; }
+  header p { margin: 0; font-size: 16px; color: #ffd700; }
+
+  main { max-width: 700px; margin: 30px auto; background-color: #fff; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+  h2 { text-align: center; margin-bottom: 20px; color: #003366; }
+  form label { display: block; margin: 15px 0 5px; font-weight: 500; }
+  input[type="text"], input[type="tel"], select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    transition: 0.3s;
+  }
+  input:focus, select:focus, textarea:focus { border-color: #003366; outline: none; }
+
+  .accessories { display: flex; flex-wrap: wrap; gap: 10px; margin: 5px 0 15px; }
+  .accessories label { flex: 1 1 45%; }
+
+  button { background-color: #003366; color: #fff; border: none; padding: 12px 25px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.3s; }
+  button:hover { background-color: #0055aa; }
+
+  @media(max-width:500px){
+    header img { margin-bottom:10px; }
+    header div { text-align: center; }
+  }
+</style>
 </head>
 <body>
 
-  <h2>RightClick Computer Sales & Service Center</h2>
-  <p>Customer Job Acknowledgement</p>
+<header>
+  <img src="logo.png" alt="RightClick Logo">
+  <div>
+    <h1>RightClick Computer Sales & Service Center</h1>
+    <p>Professional Device Service Management</p>
+  </div>
+</header>
 
-  <!-- MAIN FORM -->
-  <form id="jobForm">
+<main>
+<h2>Customer Job Acknowledgement</h2>
 
-    <label>Customer Name</label>
-    <input type="text" id="customerName" required>
+<form id="jobForm">
+  <label for="customerName">Customer Name</label>
+  <input type="text" id="customerName" required>
 
-    <label>Mobile Number</label>
-    <input type="tel" id="mobile" required>
+  <label for="mobile">Mobile Number</label>
+  <input type="tel" id="mobile" required>
 
-    <label>Item Submitted</label>
-    <select id="item" required>
-      <option value="">-- Select Item --</option>
-      <option>Laptop</option>
-      <option>Desktop / CPU</option>
-      <option>Printer</option>
-      <option>Monitor</option>
-      <option>UPS</option>
-      <option>Other</option>
-    </select>
+  <label for="item">Item Submitted</label>
+  <select id="item">
+    <option>Laptop</option>
+    <option>Desktop / CPU</option>
+    <option>Printer</option>
+    <option>Monitor</option>
+    <option>UPS</option>
+    <option>Other</option>
+  </select>
 
-    <h4>Accessories Received</h4>
-    <label>
-      <input type="checkbox" id="accAdapter"> Adapter
-    </label><br>
+  <h4>Accessories Received</h4>
+  <div class="accessories">
+    <label><input type="checkbox" id="adapter"> Adapter</label>
+    <label><input type="checkbox" id="power"> Power Cable</label>
+    <label><input type="checkbox" id="hdmi"> HDMI / VGA Cable</label>
+    <label><input type="checkbox" id="mouse"> Mouse</label>
+    <label><input type="checkbox" id="keyboard"> Keyboard</label>
+  </div>
 
-    <label>
-      <input type="checkbox" id="accCable"> Power Cable
-    </label><br>
+  <label for="otherItems">Other Items (if any)</label>
+  <input type="text" id="otherItems">
 
-    <label>
-      <input type="checkbox" id="accBag"> HDMI / VGA Cable
-    </label><br>
+  <label for="problem">Problem Reported</label>
+  <textarea id="problem" rows="4"></textarea>
 
-    <label>Other Items (if any)</label>
-    <input type="text" id="accOther" placeholder="Eg: Mouse, Keyboard, Bag">
+  <button type="submit">Generate Acknowledgement</button>
+</form>
+</main>
 
-    <label>Problem Reported</label>
-    <textarea id="problem" rows="4" required></textarea>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-    <label>Received By (Signature / Staff Name)</label>
-    <input type="text" id="signature" required>
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+  authDomain: "rightclick-service-center.firebaseapp.com",
+  projectId: "rightclick-service-center",
+  storageBucket: "rightclick-service-center.firebasestorage.app",
+  messagingSenderId: "558210394752",
+  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    <button type="submit">Generate Acknowledgement</button>
+const form = document.getElementById("jobForm");
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-  </form>
+  const data = {
+    customerName: document.getElementById("customerName").value,
+    mobile: document.getElementById("mobile").value,
+    item: document.getElementById("item").value,
+    accessories: {
+      adapter: document.getElementById("adapter").checked,
+      power: document.getElementById("power").checked,
+      hdmi: document.getElementById("hdmi").checked,
+      mouse: document.getElementById("mouse").checked,
+      keyboard: document.getElementById("keyboard").checked
+    },
+    otherItems: document.getElementById("otherItems").value,
+    problem: document.getElementById("problem").value,
+    status: "Received",
+    timestamp: serverTimestamp(),
+    jobId: "RC-" + Math.floor(Math.random()*90000+10000)
+  };
 
-  <!-- Firebase connected JS -->
-  <script type="module" src="script.js"></script>
+  await addDoc(collection(db, "jobs"), data);
+  alert("Acknowledgement Created! Job ID: " + data.jobId);
+  form.reset();
+});
+</script>
 
 </body>
 </html>
