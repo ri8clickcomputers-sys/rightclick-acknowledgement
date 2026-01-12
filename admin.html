@@ -1,44 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>RightClick Admin Panel</title>
-  <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RightClick Admin Panel</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* --- Reset & Base --- */
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Roboto', sans-serif; }
+  body { background-color: #f5f8fb; color: #333; }
+  h2, h3 { text-align: center; margin: 15px 0; }
+
+  /* --- Header --- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #003366;
+    padding: 20px;
+    color: #fff;
+    flex-wrap: wrap;
+  }
+  header img { height: 60px; margin-right: 20px; }
+  header div { text-align: center; }
+  header h1 { margin-bottom: 5px; font-size: 24px; }
+  header p { margin: 0; font-size: 16px; color: #ffd700; }
+
+  /* --- Search --- */
+  .search-container {
+    text-align: center;
+    margin: 20px 0;
+  }
+  #searchInput {
+    width: 90%;
+    max-width: 400px;
+    padding: 10px 15px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    transition: 0.3s;
+  }
+  #searchInput:focus { border-color: #003366; outline: none; }
+
+  /* --- Job Cards --- */
+  #jobsContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    padding: 0 20px 40px 20px;
+  }
+  .job-card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transition: 0.3s;
+  }
+  .job-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+  .job-card h4 { margin-bottom: 10px; color: #003366; }
+  .job-card p { margin: 5px 0; }
+  .status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 12px;
+    color: #fff;
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .Received { background-color: #007bff; }
+  .In\ Progress { background-color: #ffc107; color: #333; }
+  .Ready { background-color: #28a745; }
+  .Delivered { background-color: #6c757d; }
+
+  /* --- Select & Button --- */
+  .status-select { padding: 5px 10px; border-radius: 8px; border: 1px solid #ccc; margin-right: 10px; }
+  .update-btn { padding: 6px 12px; border:none; border-radius:8px; background-color:#003366; color:#fff; cursor:pointer; transition:0.3s; }
+  .update-btn:hover { background-color: #0055aa; }
+
+  /* --- Responsive --- */
+  @media(max-width: 500px){
+    header img { margin-bottom: 10px; }
+    header div { text-align: center; }
+  }
+</style>
 </head>
 <body>
 
-<h2>RightClick Computer Sales & Service Center</h2>
-<h3>Admin Panel - Job Status Tracker</h3>
+<header>
+  <img src="logo.png" alt="RightClick Logo">
+  <div>
+    <h1>RightClick Computer Sales & Service Center</h1>
+    <p>Professional Device Service Management</p>
+  </div>
+</header>
 
-<input type="text" id="searchInput" placeholder="Search by Job ID or Customer Name">
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Search by Job ID or Customer Name">
+</div>
 
-<table border="1" id="jobsTable">
-  <thead>
-    <tr>
-      <th>Job ID</th>
-      <th>Customer Name</th>
-      <th>Mobile</th>
-      <th>Item</th>
-      <th>Status</th>
-      <th>Update Status</th>
-    </tr>
-  </thead>
-  <tbody id="jobsBody">
-    <!-- Jobs will appear here -->
-  </tbody>
-</table>
+<div id="jobsContainer">
+  <!-- Job cards will appear here -->
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { 
-  getFirestore,
-  collection,
-  doc,
-  updateDoc,
-  getDoc,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -49,109 +116,85 @@ const firebaseConfig = {
   messagingSenderId: "558210394752",
   appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const jobsBody = document.getElementById("jobsBody");
+const jobsContainer = document.getElementById("jobsContainer");
 const searchInput = document.getElementById("searchInput");
 
-/* ---------------- REALTIME LOADING ---------------- */
-function loadJobsRealtime() {
-  onSnapshot(collection(db, "jobs"), (snapshot) => {
-    jobsBody.innerHTML = "";
+async function loadJobs() {
+  jobsContainer.innerHTML = "";
+  const querySnapshot = await getDocs(collection(db, "jobs"));
+  querySnapshot.forEach(docSnap => {
+    const job = docSnap.data();
+    const card = document.createElement("div");
+    card.className = "job-card";
 
-    snapshot.forEach((docSnap) => {
-      const job = docSnap.data();
-      const row = document.createElement("tr");
-
-      row.innerHTML = `
-        <td>${job.jobId}</td>
-        <td>${job.customerName}</td>
-        <td>${job.mobile}</td>
-        <td>${job.item}</td>
-        <td id="status-${docSnap.id}">${job.status}</td>
-        <td>
-          <select id="select-${docSnap.id}">
-            <option value="Received" ${job.status==="Received"?"selected":""}>Received</option>
-            <option value="In Progress" ${job.status==="In Progress"?"selected":""}>In Progress</option>
-            <option value="Ready" ${job.status==="Ready"?"selected":""}>Ready</option>
-            <option value="Delivered" ${job.status==="Delivered"?"selected":""}>Delivered</option>
-          </select>
-          <button onclick="updateStatus('${docSnap.id}')">Update</button>
-        </td>
-      `;
-      jobsBody.appendChild(row);
-    });
+    card.innerHTML = `
+      <h4>Job ID: ${job.jobId}</h4>
+      <p><strong>Customer:</strong> ${job.customerName}</p>
+      <p><strong>Mobile:</strong> ${job.mobile}</p>
+      <p><strong>Item:</strong> ${job.item}</p>
+      <p><strong>Status:</strong> <span class="status-badge ${job.status}">${job.status}</span></p>
+      <div>
+        <select class="status-select" id="select-${docSnap.id}">
+          <option value="Received" ${job.status==="Received"?"selected":""}>Received</option>
+          <option value="In Progress" ${job.status==="In Progress"?"selected":""}>In Progress</option>
+          <option value="Ready" ${job.status==="Ready"?"selected":""}>Ready</option>
+          <option value="Delivered" ${job.status==="Delivered"?"selected":""}>Delivered</option>
+        </select>
+        <button class="update-btn" onclick="updateStatus('${docSnap.id}')">Update</button>
+      </div>
+    `;
+    jobsContainer.appendChild(card);
   });
 }
 
-/* ---------------- UPDATE STATUS + WHATSAPP ---------------- */
-window.updateStatus = async function(docId) {
+window.updateStatus = async function(docId){
   const select = document.getElementById(`select-${docId}`);
   const newStatus = select.value;
   const docRef = doc(db, "jobs", docId);
-
   await updateDoc(docRef, { status: newStatus });
-  document.getElementById(`status-${docId}`).innerText = newStatus;
 
-  const jobDoc = await getDoc(docRef);
-  const job = jobDoc.data();
-
-  let message = "";
-
-  if (newStatus === "Received") {
-    message = `RightClick Computer Sales & Service Center
-
-Your device has been received successfully.
-Job ID: ${job.jobId}`;
-  }
-  else if (newStatus === "In Progress") {
-    message = `RightClick Computer Sales & Service Center
-
-Your device is currently under service.
-Job ID: ${job.jobId}`;
-  }
-  else if (newStatus === "Ready") {
-    message = `RightClick Computer Sales & Service Center
-
-Your device is ready for pickup.
-Job ID: ${job.jobId}
-Please visit our store.`;
-  }
-  else if (newStatus === "Delivered") {
-    message = `RightClick Computer Sales & Service Center
-
-Your device has been delivered successfully.
-Job ID: ${job.jobId}
-Thank you for choosing RightClick.`;
-  }
-
-  if (message !== "") {
-    let customerNumber = job.mobile;
-    if (!customerNumber.startsWith("91")) {
-      customerNumber = "91" + customerNumber;
-    }
-
-    const whatsappUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, "_blank");
-  }
+  // Update badge color immediately
+  const badge = document.querySelector(`#select-${docId}`).parentElement.parentElement.querySelector(".status-badge");
+  badge.innerText = newStatus;
+  badge.className = `status-badge ${newStatus}`;
 
   alert("Status updated to: " + newStatus);
+
+  // WhatsApp notification for Received status
+  if(newStatus === "Received") {
+    const jobDoc = await getDoc(docRef);
+    const job = jobDoc.data();
+
+    const message = encodeURIComponent(
+`RightClick Computer Sales & Service Center
+Your device has been received successfully.
+Job ID: ${job.jobId}
+Thank you for choosing us!`
+    );
+
+    let customerNumber = job.mobile;
+    if(!customerNumber.startsWith("91")) customerNumber = "91"+customerNumber;
+
+    const whatsappUrl = `https://wa.me/${customerNumber}?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+  }
 };
 
-/* ---------------- SEARCH ---------------- */
+// Search functionality
 searchInput.addEventListener("input", () => {
   const filter = searchInput.value.toLowerCase();
-  const rows = jobsBody.getElementsByTagName("tr");
-  for (let i = 0; i < rows.length; i++) {
-    const text = rows[i].innerText.toLowerCase();
-    rows[i].style.display = text.includes(filter) ? "" : "none";
-  }
+  const cards = jobsContainer.getElementsByClassName("job-card");
+  Array.from(cards).forEach(card => {
+    const customer = card.querySelector("p strong").nextSibling.textContent.toLowerCase();
+    const jobId = card.querySelector("h4").innerText.toLowerCase();
+    card.style.display = (customer.includes(filter) || jobId.includes(filter)) ? "" : "none";
+  });
 });
 
-/* Start realtime listener */
-loadJobsRealtime();
+loadJobs();
 </script>
 
 </body>
