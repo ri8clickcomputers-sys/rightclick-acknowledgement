@@ -1,72 +1,230 @@
+<!-- ===================== check-status.html ===================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Check Job Status - RightClick</title>
+<title>RightClick – Check Job Status</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
-body{font-family:Arial;background:#f4f6f9;margin:0}
-.container{max-width:450px;margin:30px auto;background:#fff;padding:20px;border-radius:10px;text-align:center}
-.logo img{width:120px}
-input,button{width:100%;padding:10px;margin:10px 0}
-button{background:#007bff;color:white;border:none;border-radius:5px}
-.result{margin-top:15px;font-size:15px}
+body{
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(120deg,#1f4037,#99f2c8);
+  margin:0;
+  padding:0;
+}
+.container{
+  max-width:700px;
+  margin:40px auto;
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+.logo{
+  text-align:center;
+}
+.logo img{
+  max-width:140px;
+}
+h2{
+  text-align:center;
+  margin:15px 0;
+}
+.tabs{
+  display:flex;
+  gap:10px;
+  margin-bottom:20px;
+}
+.tabs button{
+  flex:1;
+  padding:10px;
+  border:none;
+  border-radius:6px;
+  background:#ddd;
+  cursor:pointer;
+}
+.tabs button.active{
+  background:#4e54c8;
+  color:white;
+}
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+button.search-btn{
+  width:100%;
+  padding:12px;
+  background:#4e54c8;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin-top:10px;
+}
+.result{
+  margin-top:20px;
+  padding:15px;
+  border-radius:8px;
+  background:#f0f8ff;
+  display:none;
+}
+.result h3{
+  margin-top:0;
+}
+.field{
+  margin:5px 0;
+}
+.error{
+  background:#ffe5e5;
+  color:#a00000;
+  padding:10px;
+  border-radius:6px;
+  margin-top:10px;
+  display:none;
+}
+.hidden{
+  display:none;
+}
 </style>
 </head>
-
 <body>
+
 <div class="container">
-<div class="logo"><img src="logo.png"></div>
-<h3>Check Your Job Status</h3>
+  <div class="logo">
+    <img src="logo.png">
+  </div>
 
-<input type="text" id="jobId" placeholder="Enter Job ID">
-<button onclick="checkStatus()">Check</button>
+  <h2>Check Your Job Status</h2>
 
-<div class="result" id="result"></div>
+  <div class="tabs">
+    <button id="tabJobId" class="active" onclick="showByJobId()">By Job ID</button>
+    <button id="tabCustomer" onclick="showByCustomer()">By Name & Mobile</button>
+  </div>
+
+  <!-- Search by Job ID -->
+  <div id="jobIdSearch">
+    <input type="text" id="jobIdInput" placeholder="Enter Job ID (YYYYDDMM-0001)">
+    <button class="search-btn" onclick="searchByJobId()">Search</button>
+  </div>
+
+  <!-- Search by Customer -->
+  <div id="customerSearch" class="hidden">
+    <input type="text" id="custName" placeholder="Customer Name">
+    <input type="text" id="custMobile" placeholder="Mobile Number">
+    <button class="search-btn" onclick="searchByCustomer()">Search</button>
+  </div>
+
+  <div id="errorBox" class="error"></div>
+
+  <div id="resultBox" class="result">
+    <h3>Job Details</h3>
+    <div class="field"><b>Job ID:</b> <span id="rJobId"></span></div>
+    <div class="field"><b>Name:</b> <span id="rName"></span></div>
+    <div class="field"><b>Mobile:</b> <span id="rMobile"></span></div>
+    <div class="field"><b>Item:</b> <span id="rItem"></span></div>
+    <div class="field"><b>Accessories:</b> <span id="rAccessories"></span></div>
+    <div class="field"><b>Status:</b> <span id="rStatus"></span></div>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, collection, getDocs } 
+import { getFirestore, doc, getDoc, collection, query, where, getDocs } 
 from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
 const firebaseConfig = {
- apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
- authDomain: "rightclick-service-center.firebaseapp.com",
- projectId: "rightclick-service-center",
- storageBucket: "rightclick-service-center.firebasestorage.app",
- messagingSenderId: "558210394752",
- appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+  authDomain: "rightclick-service-center.firebaseapp.com",
+  projectId: "rightclick-service-center",
+  storageBucket: "rightclick-service-center.firebasestorage.app",
+  messagingSenderId: "558210394752",
+  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.checkStatus = async()=>{
- const id=document.getElementById("jobId").value.trim();
- const res=document.getElementById("result");
- res.innerHTML="Searching...";
- const snap=await getDocs(collection(db,"jobs"));
- let found=false;
+const jobIdSearch=document.getElementById("jobIdSearch");
+const customerSearch=document.getElementById("customerSearch");
+const tabJobId=document.getElementById("tabJobId");
+const tabCustomer=document.getElementById("tabCustomer");
 
- snap.forEach(d=>{
-  const j=d.data();
-  if(j.jobId===id){
-    found=true;
-    res.innerHTML=`
-    <b>Customer:</b> ${j.customerName}<br>
-    <b>Status:</b> ${j.status}<br>
-    <b>Item:</b> ${j.item}<br>
-    <b>Accessories:</b> ${j.accessories}<br>
-    <b>Updated:</b> ${j.timestamp}
-    `;
+const resultBox=document.getElementById("resultBox");
+const errorBox=document.getElementById("errorBox");
+
+window.showByJobId=function(){
+  jobIdSearch.classList.remove("hidden");
+  customerSearch.classList.add("hidden");
+  tabJobId.classList.add("active");
+  tabCustomer.classList.remove("active");
+  resetUI();
+};
+
+window.showByCustomer=function(){
+  jobIdSearch.classList.add("hidden");
+  customerSearch.classList.remove("hidden");
+  tabCustomer.classList.add("active");
+  tabJobId.classList.remove("active");
+  resetUI();
+};
+
+function resetUI(){
+  resultBox.style.display="none";
+  errorBox.style.display="none";
+}
+
+function showResult(data){
+  document.getElementById("rJobId").innerText=data.jobId;
+  document.getElementById("rName").innerText=data.customerName;
+  document.getElementById("rMobile").innerText=data.mobile;
+  document.getElementById("rItem").innerText=data.item;
+  document.getElementById("rAccessories").innerText=data.accessories;
+  document.getElementById("rStatus").innerText=data.status;
+  resultBox.style.display="block";
+  errorBox.style.display="none";
+}
+
+function showError(msg){
+  errorBox.innerText=msg;
+  errorBox.style.display="block";
+  resultBox.style.display="none";
+}
+
+window.searchByJobId = async function(){
+  const id=document.getElementById("jobIdInput").value.trim();
+  if(!id) return showError("Please enter Job ID");
+  const ref=doc(db,"jobs",id);
+  const snap=await getDoc(ref);
+  if(snap.exists()){
+    showResult(snap.data());
+  }else{
+    showError("No job found with this Job ID");
   }
- });
+};
 
- if(!found){
-   res.innerHTML="❌ Job ID not found. Please check again.";
- }
+window.searchByCustomer = async function(){
+  const name=document.getElementById("custName").value.trim();
+  const mobile=document.getElementById("custMobile").value.trim();
+  if(!name || !mobile) return showError("Enter both Name and Mobile");
+
+  const q=query(
+    collection(db,"jobs"),
+    where("customerName","==",name),
+    where("mobile","==",mobile)
+  );
+
+  const snap=await getDocs(q);
+  if(!snap.empty){
+    showResult(snap.docs[0].data());
+  }else{
+    showError("No job found with given details");
+  }
 };
 </script>
 </body>
