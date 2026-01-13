@@ -14,64 +14,33 @@
   --secondary:#1c6dd0;
   --bg:#f3f6fb;
   --card:#ffffff;
-  --radius:12px;
 }
-*{
-  box-sizing:border-box;
-  font-family:Poppins, sans-serif;
-}
-body{
-  margin:0;
-  background:var(--bg);
-}
+*{box-sizing:border-box;font-family:Poppins,sans-serif}
+body{margin:0;background:var(--bg)}
 
-/* HEADER – MOBILE FIRST */
 header{
   background:linear-gradient(135deg,var(--primary),var(--secondary));
-  padding:12px 10px;
+  padding:12px;
   text-align:center;
 }
-header img{
-  height:60px;
-  display:block;
-  margin:0 auto;
-}
-header h2{
-  margin:6px 0 0;
-  font-size:18px;
-  color:white;
-  font-weight:600;
-}
+header img{height:60px;margin:auto;display:block}
+header h2{color:white;font-size:18px;margin-top:6px}
 
-/* FORM CARD */
-main{
-  padding:15px;
-}
-.form-card{
+main{padding:15px}
+.card{
   background:var(--card);
-  border-radius:var(--radius);
+  border-radius:14px;
   padding:18px;
-  box-shadow:0 4px 15px rgba(0,0,0,.1);
-}
-.form-card h3{
-  text-align:center;
-  color:var(--primary);
-  margin-bottom:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,.1);
 }
 
-label{
-  font-size:13px;
-  font-weight:500;
-  margin-top:10px;
-  display:block;
-}
+label{font-size:13px;font-weight:500;margin-top:10px;display:block}
 input,select,textarea{
   width:100%;
   padding:10px;
-  margin-top:5px;
   border-radius:8px;
   border:1px solid #ccc;
-  font-size:14px;
+  margin-top:4px;
 }
 textarea{resize:none}
 
@@ -85,13 +54,11 @@ button{
   border-radius:10px;
   font-size:16px;
   font-weight:600;
-  cursor:pointer;
-}
-button:active{
-  transform:scale(.98);
 }
 
-/* Popup */
+.hidden{display:none}
+
+/* POPUP */
 #popup{
   display:none;
   position:fixed;
@@ -99,47 +66,14 @@ button:active{
   background:rgba(0,0,0,.6);
   justify-content:center;
   align-items:center;
-  z-index:100;
 }
 .popup-box{
   background:white;
   width:90%;
   max-width:380px;
-  border-radius:16px;
   padding:20px;
+  border-radius:16px;
   text-align:center;
-  animation:pop .3s ease;
-}
-@keyframes pop{
-  from{transform:scale(.7);opacity:0}
-  to{transform:scale(1);opacity:1}
-}
-.popup-box img{
-  height:50px;
-}
-.popup-box h3{
-  margin:10px 0;
-  color:var(--primary);
-}
-.popup-box p{
-  font-size:14px;
-  margin:4px 0;
-}
-.hidden{display:none}
-
-/* DESKTOP */
-@media(min-width:768px){
-  header{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:15px;
-  }
-  header h2{font-size:22px}
-  main{
-    max-width:500px;
-    margin:20px auto;
-  }
 }
 </style>
 </head>
@@ -152,63 +86,59 @@ button:active{
 </header>
 
 <main>
-  <div class="form-card">
-    <h3>Job Acknowledgement</h3>
+<div class="card">
+<h3 style="text-align:center;color:#0b3a66">Job Acknowledgement</h3>
 
-    <form id="jobForm">
+<form id="jobForm">
 
-      <label>Date</label>
-      <input type="text" id="jobDate" required>
+<label>Date</label>
+<input type="text" id="jobDate" required>
 
-      <label>Customer Name</label>
-      <input type="text" id="customerName" required>
+<label>Customer Name</label>
+<input type="text" id="customerName" required>
 
-      <label>Mobile Number</label>
-      <input type="tel" id="mobile" required>
+<label>Mobile Number</label>
+<input type="tel" id="mobile" required>
 
-      <label>Item Category</label>
-      <select id="itemCategory" required>
-        <option value="">Select</option>
-        <option>Laptop</option>
-        <option>Desktop</option>
-        <option>Printer</option>
-        <option>Monitor</option>
-        <option>UPS</option>
-        <option>Other</option>
-      </select>
+<label>Device Type</label>
+<select id="itemCategory" required>
+  <option value="">Select</option>
+  <option>Desktop</option>
+  <option>Laptop</option>
+  <option>Printer</option>
+  <option>Monitor</option>
+  <option>UPS</option>
+  <option>Other</option>
+</select>
 
-      <label id="itemNameLabel">Item Name</label>
-      <input type="text" id="itemName" required>
+<label id="itemNameLabel">Device Name</label>
+<input type="text" id="itemName" required>
 
-      <label>Accessories Received</label>
-      <select id="accessoriesType" required>
-        <option value="">Select</option>
-        <option>Without power cable and adapter</option>
-        <option>With Adapter without power cable</option>
-        <option>With power cable and adapter</option>
-        <option value="Other">Other</option>
-      </select>
+<label>Accessories Received</label>
+<select id="accessoriesType" required>
+  <option value="">Select</option>
+  <option>Without power cable and adapter</option>
+  <option>With Adapter without power cable</option>
+  <option>With power cable and adapter</option>
+  <option value="Other">Other</option>
+</select>
 
-      <input type="text" id="accessoriesOther" class="hidden" placeholder="Specify accessories">
+<input type="text" id="accessoriesOther" class="hidden" placeholder="Specify accessories">
 
-      <label>Problem Reported</label>
-      <textarea id="problem" rows="3"></textarea>
+<label>Problem Reported</label>
+<textarea id="problem" rows="3"></textarea>
 
-      <button type="submit">Create Job & Send WhatsApp</button>
-    </form>
-  </div>
+<button type="submit">Create Job & Send WhatsApp</button>
+</form>
+</div>
 </main>
 
-<!-- POPUP -->
 <div id="popup">
   <div class="popup-box">
-    <img src="logo.png">
-    <h3>Job Created</h3>
-    <p><b>Job ID:</b> <span id="pJobId"></span></p>
-    <p><b>Customer:</b> <span id="pCustomer"></span></p>
-    <p><b>Item:</b> <span id="pItem"></span></p>
-    <p><b>Accessories:</b> <span id="pAccessories"></span></p>
-    <button onclick="closePopup()">Close</button>
+    <img src="logo.png" height="50"><br><br>
+    <b>Job Created</b><br><br>
+    Job ID: <span id="pJobId"></span><br><br>
+    <button onclick="popup.style.display='none'">Close</button>
   </div>
 </div>
 
@@ -221,63 +151,57 @@ import { getFirestore, collection, addDoc, getDocs, query, orderBy, limit } from
 const firebaseConfig = {
   apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
   authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-  storageBucket: "rightclick-service-center.firebasestorage.app",
-  messagingSenderId: "558210394752",
-  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+  projectId: "rightclick-service-center"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-flatpickr("#jobDate",{dateFormat:"Y-m-d",defaultDate:"today"});
+flatpickr("#jobDate",{dateFormat:"d/m/Y",defaultDate:"today"});
 
 itemCategory.addEventListener("change",()=>{
-  itemNameLabel.innerText = itemCategory.value ? itemCategory.value+" Name" : "Item Name";
+  itemNameLabel.innerText = itemCategory.value
+    ? itemCategory.value + " Name"
+    : "Device Name";
 });
 
 accessoriesType.addEventListener("change",()=>{
   accessoriesOther.classList.toggle("hidden", accessoriesType.value!=="Other");
 });
 
+/* JOB ID: YYYYDDMM0001 */
 async function generateJobId(){
   const d=new Date();
-  const datePart=d.getFullYear()+String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0");
+  const datePart=d.getFullYear()
+    +String(d.getDate()).padStart(2,"0")
+    +String(d.getMonth()+1).padStart(2,"0");
+
   const q=query(collection(db,"jobs"),orderBy("jobId","desc"),limit(1));
   const snap=await getDocs(q);
+
   let num=1;
   if(!snap.empty){
     const last=snap.docs[0].data().jobId;
-    if(last.startsWith(datePart)) num=parseInt(last.split("-")[1])+1;
+    if(last.startsWith(datePart)) num=parseInt(last.slice(8))+1;
   }
-  return `${datePart}-${String(num).padStart(4,"0")}`;
+  return datePart + String(num).padStart(4,"0");
 }
-
-let submitting=false;
 
 jobForm.addEventListener("submit",async(e)=>{
   e.preventDefault();
-  if(submitting) return;
-  submitting=true;
 
   const jobId=await generateJobId();
   const time=new Date().toLocaleString("en-IN");
   const accessories = accessoriesType.value==="Other" ? accessoriesOther.value : accessoriesType.value;
 
-  const data={
-    jobId,
-    date:jobDate.value,
-    customerName:customerName.value,
-    mobile:mobile.value,
-    itemCategory:itemCategory.value,
-    itemName:itemName.value,
-    accessories,
-    problem:problem.value,
-    status:"Received",
-    timestamp:time
-  };
+  const deviceLabel = itemCategory.value + " Name";
 
-  await addDoc(collection(db,"jobs"),data);
+  await addDoc(collection(db,"jobs"),{
+    jobId, customerName:customerName.value, mobile:mobile.value,
+    itemCategory:itemCategory.value, itemName:itemName.value,
+    accessories, problem:problem.value,
+    status:"Received", timestamp:time
+  });
 
   let mobileNo=mobile.value;
   if(!mobileNo.startsWith("91")) mobileNo="91"+mobileNo;
@@ -285,21 +209,21 @@ jobForm.addEventListener("submit",async(e)=>{
   const msg=encodeURIComponent(
 `RightClick Computer Sales & Service Center
 
-Hello ${data.customerName},
+Hello ${customerName.value},
 
 Your device has been successfully RECEIVED.
 
 Job ID : ${jobId}
 Date & Time : ${time}
-Mobile : ${data.mobile}
+Mobile : ${mobile.value}
 
-Device : ${data.itemCategory}
-Model / Name : ${data.itemName}
+Device : ${itemCategory.value}
+${deviceLabel} : ${itemName.value}
 
-Accessories : ${data.accessories}
+Accessories : ${accessories}
 
 Problem :
-${data.problem || "Not specified"}
+${problem.value || "Not specified"}
 
 Thank you for choosing RightClick.`
   );
@@ -307,16 +231,9 @@ Thank you for choosing RightClick.`
   window.open(`https://wa.me/${mobileNo}?text=${msg}`,"_blank");
 
   pJobId.innerText=jobId;
-  pCustomer.innerText=data.customerName;
-  pItem.innerText=data.itemName;
-  pAccessories.innerText=data.accessories;
-
   popup.style.display="flex";
   jobForm.reset();
-  submitting=false;
 });
-
-window.closePopup=()=>popup.style.display="none";
 </script>
 
 </body>
