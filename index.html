@@ -1,139 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>RightClick – Job Acknowledgement</title>
+  <meta charset="UTF-8">
+  <title>RightClick Computers - Job Creation</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
+      background: #f4f6f9;
+      padding: 20px;
     }
-    .card {
-      background: #1e293b;
-      padding: 25px;
-      border-radius: 10px;
-      width: 350px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    .container {
+      max-width: 450px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h2 {
       text-align: center;
-      margin-bottom: 15px;
-      color: #38bdf8;
     }
-    input, textarea, button {
+    input, textarea, select, button {
       width: 100%;
+      margin-top: 8px;
       padding: 10px;
-      margin: 6px 0;
-      border: none;
-      border-radius: 5px;
       font-size: 14px;
-    }
-    input, textarea {
-      background: #0f172a;
-      color: #fff;
-      border: 1px solid #334155;
     }
     button {
-      background: #38bdf8;
-      color: #000;
-      font-weight: bold;
+      background: #007bff;
+      color: white;
+      border: none;
       cursor: pointer;
+      margin-top: 15px;
     }
-    button:disabled {
-      background: #64748b;
-      cursor: not-allowed;
+    button:hover {
+      background: #0056b3;
     }
-    .status {
-      margin-top: 10px;
+    .result {
+      margin-top: 15px;
+      padding: 10px;
       text-align: center;
-      font-size: 14px;
+      font-weight: bold;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>Job Acknowledgement</h2>
+<div class="container">
+  <h2>Create New Job</h2>
 
-    <input type="text" id="customerName" placeholder="Customer Name" />
-    <input type="text" id="mobile" placeholder="Mobile Number" />
-    <input type="text" id="device" placeholder="Device (Laptop / Mobile / etc)" />
-    <textarea id="issue" placeholder="Problem Description"></textarea>
+  <input type="text" id="customerName" placeholder="Customer Name" required>
+  <input type="text" id="mobile" placeholder="Mobile Number" required>
+  <select id="deviceType">
+    <option value="">Select Device Type</option>
+    <option value="Mobile">Mobile</option>
+    <option value="Laptop">Laptop</option>
+    <option value="Desktop">Desktop</option>
+    <option value="Printer">Printer</option>
+    <option value="Other">Other</option>
+  </select>
+  <input type="text" id="deviceName" placeholder="Device Name / Model">
+  <input type="text" id="accessories" placeholder="Accessories Given">
+  <textarea id="problem" placeholder="Problem Description"></textarea>
 
-    <button id="submitBtn" onclick="createJob()">Create Job</button>
+  <button onclick="createJob()">Create Job</button>
 
-    <div class="status" id="status"></div>
-  </div>
+  <div id="result" class="result"></div>
+</div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyIDfJ8kZJm_M9NZDEXrK2fCncM4a5ypBCCIHe6z4q31mWrxILIWHQ2vfETxJ4MlBLk/exec";
 
-async function createJob() {
-  const btn = document.getElementById("submitBtn");
-  const status = document.getElementById("status");
-
+function createJob() {
   const customerName = document.getElementById("customerName").value.trim();
   const mobile = document.getElementById("mobile").value.trim();
-  const device = document.getElementById("device").value.trim();
-  const issue = document.getElementById("issue").value.trim();
+  const deviceType = document.getElementById("deviceType").value;
+  const deviceName = document.getElementById("deviceName").value.trim();
+  const accessories = document.getElementById("accessories").value.trim();
+  const problem = document.getElementById("problem").value.trim();
+  const resultDiv = document.getElementById("result");
 
-  if (!customerName || !mobile || !device || !issue) {
-    status.innerHTML = "❌ Please fill all fields";
-    status.style.color = "orange";
+  if (!customerName || !mobile) {
+    resultDiv.innerHTML = "❌ Customer Name & Mobile are required";
+    resultDiv.className = "result error";
     return;
   }
 
-  btn.disabled = true;
-  status.innerHTML = "⏳ Creating Job ID...";
-  status.style.color = "yellow";
+  const data = {
+    customerName,
+    mobile,
+    deviceType,
+    deviceName,
+    accessories,
+    problem
+  };
 
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify({
-        customerName,
-        mobile,
-        device,
-        issue
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
+  resultDiv.innerHTML = "⏳ Creating Job...";
+  resultDiv.className = "result";
 
-    const data = await response.json();
-
-    if (data.jobId) {
-      status.innerHTML = `✅ Job Created Successfully<br><b>Job ID:</b> ${data.jobId}`;
-      status.style.color = "#22c55e";
-
-      // Clear form
-      document.getElementById("customerName").value = "";
-      document.getElementById("mobile").value = "";
-      document.getElementById("device").value = "";
-      document.getElementById("issue").value = "";
-    } 
-    else if (data.status) {
-      status.innerHTML = "⚠️ " + data.status;
-      status.style.color = "orange";
-    } 
-    else {
-      status.innerHTML = "❌ Unexpected API response";
-      status.style.color = "red";
+  fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {
+      "Content-Type": "application/json"
     }
-  } 
-  catch (err) {
+  })
+  .then(res => res.json())
+  .then(response => {
+    if (response.status === "success") {
+      resultDiv.innerHTML = `✅ Job Created Successfully<br>Job ID: ${response.jobId}`;
+      resultDiv.className = "result success";
+      clearForm();
+    } else {
+      resultDiv.innerHTML = "❌ Error: " + response.message;
+      resultDiv.className = "result error";
+    }
+  })
+  .catch(err => {
+    resultDiv.innerHTML = "❌ API Connection Failed";
+    resultDiv.className = "result error";
     console.error(err);
-    status.innerHTML = "❌ API Connection Failed";
-    status.style.color = "red";
-  }
+  });
+}
 
-  btn.disabled = false;
+function clearForm() {
+  document.getElementById("customerName").value = "";
+  document.getElementById("mobile").value = "";
+  document.getElementById("deviceType").value = "";
+  document.getElementById("deviceName").value = "";
+  document.getElementById("accessories").value = "";
+  document.getElementById("problem").value = "";
 }
 </script>
 
