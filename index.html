@@ -1,219 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>RightClick Job Acknowledgement</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
-<style>
-*{box-sizing:border-box;font-family:'Roboto',sans-serif}
-body{margin:0;background:#f5f8fb}
-header{
-  background:#003366;
-  padding:16px;
-  text-align:center;
-}
-header img{
-  height:60px;
-  display:block;
-  margin:0 auto 8px;
-}
-header h1{color:#fff;font-size:20px;margin:0}
-header p{color:#ffd700;margin:4px 0 0}
-
-main{
-  max-width:520px;
-  margin:20px auto;
-  background:#fff;
-  padding:20px;
-  border-radius:14px;
-  box-shadow:0 4px 14px rgba(0,0,0,.1);
-}
-
-label{font-weight:500;margin-top:14px;display:block}
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  margin-top:6px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:15px;
-}
-
-button{
-  width:100%;
-  margin-top:20px;
-  padding:14px;
-  border:none;
-  border-radius:10px;
-  background:#003366;
-  color:#fff;
-  font-size:17px;
-  font-weight:600;
-  cursor:pointer;
-}
-
-.hidden{display:none}
-
-.success{
-  background:#e6ffe6;
-  color:#006600;
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px;
-  text-align:center;
-}
-.error{
-  background:#ffe6e6;
-  color:#a00000;
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px;
-  text-align:center;
-}
-</style>
+  <meta charset="UTF-8" />
+  <title>RightClick – Job Acknowledgement</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #1e293b;
+      padding: 25px;
+      border-radius: 10px;
+      width: 350px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #38bdf8;
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      border: none;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    input, textarea {
+      background: #0f172a;
+      color: #fff;
+      border: 1px solid #334155;
+    }
+    button {
+      background: #38bdf8;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+    }
+    .status {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+  </style>
 </head>
-
 <body>
 
-<header>
-  <img src="logo.png" alt="RightClick Logo">
-  <h1>RightClick Computer Sales & Service Center</h1>
-  <p>Professional Device Service</p>
-</header>
+  <div class="card">
+    <h2>Job Acknowledgement</h2>
 
-<main>
-<form id="jobForm">
+    <input type="text" id="customerName" placeholder="Customer Name" />
+    <input type="text" id="mobile" placeholder="Mobile Number" />
+    <input type="text" id="device" placeholder="Device (Laptop / Mobile / etc)" />
+    <textarea id="issue" placeholder="Problem Description"></textarea>
 
-<label>Job Date</label>
-<input type="date" id="jobDate" required>
+    <button id="submitBtn" onclick="createJob()">Create Job</button>
 
-<label>Customer Name</label>
-<input type="text" id="customerName" required>
-
-<label>Mobile Number</label>
-<input type="tel" id="mobile" required>
-
-<label>Device Type</label>
-<select id="item" required>
-  <option value="">Select</option>
-  <option>Laptop</option>
-  <option>Desktop</option>
-  <option>Printer</option>
-  <option>Monitor</option>
-  <option>Other</option>
-</select>
-
-<label id="deviceLabel">Device Name</label>
-<input type="text" id="deviceName" required>
-
-<label>Accessories Received</label>
-<select id="accessories">
-  <option>Without power cable and adapter</option>
-  <option>With Adapter without power cable</option>
-  <option>With power cable and adapter</option>
-  <option value="Other">Other</option>
-</select>
-
-<input type="text" id="accessoriesOther" class="hidden" placeholder="Enter accessories">
-
-<label>Problem Reported</label>
-<textarea id="problem" rows="3"></textarea>
-
-<button type="submit">Generate Acknowledgement</button>
-
-<div id="msgBox"></div>
-
-</form>
-</main>
+    <div class="status" id="status"></div>
+  </div>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyIDfJ8kZJm_M9NZDEXrK2fCncM4a5ypBCCIHe6z4q31mWrxILIWHQ2vfETxJ4MlBLk/exec";
 
-const item = document.getElementById("item");
-const deviceLabel = document.getElementById("deviceLabel");
-const accessories = document.getElementById("accessories");
-const accessoriesOther = document.getElementById("accessoriesOther");
-const msgBox = document.getElementById("msgBox");
+async function createJob() {
+  const btn = document.getElementById("submitBtn");
+  const status = document.getElementById("status");
 
-item.onchange = ()=>{
-  deviceLabel.innerText = item.value ? item.value + " Name" : "Device Name";
-};
+  const customerName = document.getElementById("customerName").value.trim();
+  const mobile = document.getElementById("mobile").value.trim();
+  const device = document.getElementById("device").value.trim();
+  const issue = document.getElementById("issue").value.trim();
 
-accessories.onchange = ()=>{
-  accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
-};
+  if (!customerName || !mobile || !device || !issue) {
+    status.innerHTML = "❌ Please fill all fields";
+    status.style.color = "orange";
+    return;
+  }
 
-document.getElementById("jobForm").addEventListener("submit", async e=>{
-  e.preventDefault();
-  msgBox.innerHTML = "";
+  btn.disabled = true;
+  status.innerHTML = "⏳ Creating Job ID...";
+  status.style.color = "yellow";
 
-  const accFinal =
-    accessories.value === "Other"
-      ? accessoriesOther.value
-      : accessories.value;
-
-  const data = {
-    date: jobDate.value,
-    customerName: customerName.value,
-    mobile: mobile.value,
-    item: item.value,
-    deviceName: deviceName.value,
-    accessories: accFinal,
-    problem: problem.value
-  };
-
-  try{
-    const res = await fetch(API_URL,{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify(data)
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify({
+        customerName,
+        mobile,
+        device,
+        issue
+      }),
+      headers: {
+        "Content-Type": "application/json"
+      }
     });
 
-    const result = await res.json();
+    const data = await response.json();
 
-    if(result.status === "success"){
-      msgBox.innerHTML = `
-        <div class="success">
-          ✅ Job Created Successfully<br>
-          <b>Job ID:</b> ${result.jobId}
-        </div>
-      `;
+    if (data.jobId) {
+      status.innerHTML = `✅ Job Created Successfully<br><b>Job ID:</b> ${data.jobId}`;
+      status.style.color = "#22c55e";
 
-      // WhatsApp auto open
-      let num = data.mobile;
-      if(!num.startsWith("91")) num = "91" + num;
-
-      const waMsg = encodeURIComponent(
-`RightClick Computer Sales & Service Center
-Hello ${data.customerName},
-Your device has been successfully received.
-
-Job ID : ${result.jobId}
-Device : ${data.item}
-${data.item} Name : ${data.deviceName}
-Accessories : ${data.accessories}
-Problem :
-${data.problem}
-
-Thank you for choosing RightClick.`
-      );
-
-      window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
-
-      e.target.reset();
+      // Clear form
+      document.getElementById("customerName").value = "";
+      document.getElementById("mobile").value = "";
+      document.getElementById("device").value = "";
+      document.getElementById("issue").value = "";
+    } 
+    else if (data.status) {
+      status.innerHTML = "⚠️ " + data.status;
+      status.style.color = "orange";
+    } 
+    else {
+      status.innerHTML = "❌ Unexpected API response";
+      status.style.color = "red";
     }
-    else{
-      msgBox.innerHTML = `<div class="error">❌ ${result.message}</div>`;
-    }
-  }
-  catch(err){
-    msgBox.innerHTML = `<div class="error">❌ API Connection Failed</div>`;
+  } 
+  catch (err) {
     console.error(err);
+    status.innerHTML = "❌ API Connection Failed";
+    status.style.color = "red";
   }
-});
+
+  btn.disabled = false;
+}
 </script>
 
 </body>
