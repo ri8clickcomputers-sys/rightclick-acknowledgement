@@ -73,16 +73,13 @@ button{
 <body>
 
 <header>
-  <img src="logo.png" alt="RightClick Logo">
+  <img src="logo.png">
   <h1>RightClick Computer Sales & Service Center</h1>
   <p>Professional Device Service</p>
 </header>
 
 <main>
 <form id="jobForm">
-
-<label>Job Date</label>
-<input type="date" id="jobDate" required>
 
 <label>Customer Name</label>
 <input type="text" id="customerName" required>
@@ -110,7 +107,6 @@ button{
   <option>With power cable and adapter</option>
   <option value="Other">Other</option>
 </select>
-
 <input type="text" id="accessoriesOther" class="hidden" placeholder="Enter accessories">
 
 <label>Problem Reported</label>
@@ -119,13 +115,24 @@ button{
 <button type="submit">Generate Acknowledgement</button>
 
 <div id="msgBox"></div>
-
 </form>
 </main>
 
-<script>
-// 🔗 YOUR DEPLOYED APPS SCRIPT API
-const API_URL = "https://script.google.com/macros/s/AKfycbzGPcInD6CKjRC-Y9wvByPiIx4clfsVg-Qtb08tA0iucvVmvw5OJHOtk0QJ_vZ44hhI/exec";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
+  authDomain: "rightclick-service-center.firebaseapp.com",
+  projectId: "rightclick-service-center",
+  storageBucket: "rightclick-service-center.firebasestorage.app",
+  messagingSenderId: "558210394752",
+  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 const item = document.getElementById("item");
 const deviceLabel = document.getElementById("deviceLabel");
@@ -141,70 +148,64 @@ accessories.onchange = () => {
   accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
 };
 
+function generateJobId(){
+  const d = new Date();
+  return "RC" + d.getTime();
+}
+
 document.getElementById("jobForm").addEventListener("submit", async e => {
   e.preventDefault();
   msgBox.innerHTML = "";
 
-  const accFinal = accessories.value === "Other"
-    ? accessoriesOther.value
-    : accessories.value;
+  const accFinal = accessories.value === "Other" ? accessoriesOther.value : accessories.value;
+  const jobId = generateJobId();
 
   const data = {
-    jobDate: jobDate.value,
+    jobId,
     customerName: customerName.value,
     mobile: mobile.value,
     item: item.value,
     deviceName: deviceName.value,
     accessories: accFinal,
     problem: problem.value,
-    status: "Received"
+    status: "Received",
+    createdAt: new Date()
   };
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
+  try{
+    await setDoc(doc(db,"jobs",jobId), data);
 
-    const result = await res.json();
+    msgBox.innerHTML = `
+      <div class="success">
+        ✅ Job Created Successfully<br>
+        <b>Job ID:</b> ${jobId}
+      </div>
+    `;
 
-    if (result.status === "success") {
-      msgBox.innerHTML = `
-        <div class="success">
-          ✅ Job Created Successfully<br>
-          <b>Job ID:</b> ${result.jobId}
-        </div>
-      `;
+    let num = data.mobile;
+    if(!num.startsWith("91")) num = "91" + num;
 
-      let num = data.mobile;
-      if (!num.startsWith("91")) num = "91" + num;
-
-      const waMsg = encodeURIComponent(
+    const waMsg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 Hello ${data.customerName},
 Your device has been successfully received.
 
-Job ID : ${result.jobId}
+Job ID : ${jobId}
 Device : ${data.item}
 ${data.item} Name : ${data.deviceName}
 Accessories : ${data.accessories}
 Problem :
 ${data.problem}
+
 Status : Received
-
 Thank you for choosing RightClick.`
-      );
+    );
 
-      window.open(`https://wa.me/${num}?text=${waMsg}`, "_blank");
-      e.target.reset();
+    window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
+    e.target.reset();
 
-    } else {
-      msgBox.innerHTML = `<div class="error">❌ ${result.message}</div>`;
-    }
-
-  } catch (err) {
-    msgBox.innerHTML = `<div class="error">❌ API Connection Failed</div>`;
+  }catch(err){
+    msgBox.innerHTML = `<div class="error">❌ Error saving data</div>`;
     console.error(err);
   }
 });
