@@ -5,6 +5,7 @@
 <title>RightClick Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
 *{box-sizing:border-box;font-family:'Roboto',sans-serif}
 body{margin:0;background:#f5f8fb}
@@ -70,6 +71,7 @@ button{
 </head>
 
 <body>
+
 <header>
   <img src="logo.png" alt="RightClick Logo">
   <h1>RightClick Computer Sales & Service Center</h1>
@@ -78,6 +80,7 @@ button{
 
 <main>
 <form id="jobForm">
+
 <label>Job Date</label>
 <input type="date" id="jobDate" required>
 
@@ -107,18 +110,22 @@ button{
   <option>With power cable and adapter</option>
   <option value="Other">Other</option>
 </select>
+
 <input type="text" id="accessoriesOther" class="hidden" placeholder="Enter accessories">
 
 <label>Problem Reported</label>
 <textarea id="problem" rows="3"></textarea>
 
 <button type="submit">Generate Acknowledgement</button>
+
 <div id="msgBox"></div>
+
 </form>
 </main>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyIDfJ8kZJm_M9NZDEXrK2fCncM4a5ypBCCIHe6z4q31mWrxILIWHQ2vfETxJ4MlBLk/exec";
+// 🔗 YOUR DEPLOYED APPS SCRIPT API
+const API_URL = "https://script.google.com/macros/s/AKfycbzGPcInD6CKjRC-Y9wvByPiIx4clfsVg-Qtb08tA0iucvVmvw5OJHOtk0QJ_vZ44hhI/exec";
 
 const item = document.getElementById("item");
 const deviceLabel = document.getElementById("deviceLabel");
@@ -138,10 +145,9 @@ document.getElementById("jobForm").addEventListener("submit", async e => {
   e.preventDefault();
   msgBox.innerHTML = "";
 
-  const accFinal =
-    accessories.value === "Other"
-      ? accessoriesOther.value
-      : accessories.value;
+  const accFinal = accessories.value === "Other"
+    ? accessoriesOther.value
+    : accessories.value;
 
   const data = {
     jobDate: jobDate.value,
@@ -185,7 +191,6 @@ ${data.item} Name : ${data.deviceName}
 Accessories : ${data.accessories}
 Problem :
 ${data.problem}
-
 Status : Received
 
 Thank you for choosing RightClick.`
@@ -193,14 +198,17 @@ Thank you for choosing RightClick.`
 
       window.open(`https://wa.me/${num}?text=${waMsg}`, "_blank");
       e.target.reset();
+
     } else {
       msgBox.innerHTML = `<div class="error">❌ ${result.message}</div>`;
     }
+
   } catch (err) {
     msgBox.innerHTML = `<div class="error">❌ API Connection Failed</div>`;
     console.error(err);
   }
 });
 </script>
+
 </body>
 </html>
