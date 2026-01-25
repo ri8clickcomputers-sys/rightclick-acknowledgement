@@ -21,6 +21,7 @@ header img{
 }
 header h1{color:#fff;font-size:20px;margin:0}
 header p{color:#ffd700;margin:4px 0 0}
+
 main{
   max-width:520px;
   margin:20px auto;
@@ -29,7 +30,9 @@ main{
   border-radius:14px;
   box-shadow:0 4px 14px rgba(0,0,0,.1);
 }
+
 label{font-weight:500;margin-top:14px;display:block}
+
 input,select,textarea{
   width:100%;
   padding:12px;
@@ -38,6 +41,7 @@ input,select,textarea{
   border:1px solid #ccc;
   font-size:15px;
 }
+
 button{
   width:100%;
   margin-top:20px;
@@ -50,7 +54,9 @@ button{
   font-weight:600;
   cursor:pointer;
 }
+
 .hidden{display:none}
+
 .success{
   background:#e6ffe6;
   color:#006600;
@@ -59,6 +65,7 @@ button{
   margin-top:10px;
   text-align:center;
 }
+
 .error{
   background:#ffe6e6;
   color:#a00000;
@@ -73,13 +80,16 @@ button{
 <body>
 
 <header>
-  <img src="logo.png">
+  <img src="logo.png" alt="RightClick Logo">
   <h1>RightClick Computer Sales & Service Center</h1>
   <p>Professional Device Service</p>
 </header>
 
 <main>
 <form id="jobForm">
+
+<label>Job Date</label>
+<input type="date" id="jobDate" required>
 
 <label>Customer Name</label>
 <input type="text" id="customerName" required>
@@ -107,32 +117,21 @@ button{
   <option>With power cable and adapter</option>
   <option value="Other">Other</option>
 </select>
+
 <input type="text" id="accessoriesOther" class="hidden" placeholder="Enter accessories">
 
 <label>Problem Reported</label>
 <textarea id="problem" rows="3"></textarea>
 
 <button type="submit">Generate Acknowledgement</button>
-
 <div id="msgBox"></div>
+
 </form>
 </main>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyB8uRXxvOyZeCUzPEt-pUytXj_R8N_JLww",
-  authDomain: "rightclick-service-center.firebaseapp.com",
-  projectId: "rightclick-service-center",
-  storageBucket: "rightclick-service-center.firebasestorage.app",
-  messagingSenderId: "558210394752",
-  appId: "1:558210394752:web:a3f8663d7c6dc8cc88d465"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+<script>
+// 🔗 YOUR NEW DEPLOYED API (cleaned single URL)
+const API_URL = "https://script.google.com/macros/s/AKfycbxXbEZ-DVeNWwHkqyKSJlcuPrVjXdXQAnfy8uri4FKV8c9Jy-uz7Efh6t0gR6KIhRgV/exec";
 
 const item = document.getElementById("item");
 const deviceLabel = document.getElementById("deviceLabel");
@@ -148,64 +147,71 @@ accessories.onchange = () => {
   accessoriesOther.classList.toggle("hidden", accessories.value !== "Other");
 };
 
-function generateJobId(){
-  const d = new Date();
-  return "RC" + d.getTime();
-}
-
 document.getElementById("jobForm").addEventListener("submit", async e => {
   e.preventDefault();
   msgBox.innerHTML = "";
 
-  const accFinal = accessories.value === "Other" ? accessoriesOther.value : accessories.value;
-  const jobId = generateJobId();
+  const accFinal = accessories.value === "Other"
+    ? accessoriesOther.value
+    : accessories.value;
 
   const data = {
-    jobId,
     customerName: customerName.value,
     mobile: mobile.value,
     item: item.value,
     deviceName: deviceName.value,
     accessories: accFinal,
     problem: problem.value,
-    status: "Received",
-    createdAt: new Date()
+    status: "Received"
   };
 
-  try{
-    await setDoc(doc(db,"jobs",jobId), data);
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
 
-    msgBox.innerHTML = `
-      <div class="success">
-        ✅ Job Created Successfully<br>
-        <b>Job ID:</b> ${jobId}
-      </div>
-    `;
+    const result = await res.json();
 
-    let num = data.mobile;
-    if(!num.startsWith("91")) num = "91" + num;
+    if (result.status === "success") {
+      msgBox.innerHTML = `
+        <div class="success">
+          ✅ Job Created Successfully<br>
+          <b>Job ID:</b> ${result.jobId}
+        </div>
+      `;
 
-    const waMsg = encodeURIComponent(
+      // WhatsApp Message
+      let num = data.mobile;
+      if (!num.startsWith("91")) num = "91" + num;
+
+      const waMsg = encodeURIComponent(
 `RightClick Computer Sales & Service Center
 Hello ${data.customerName},
+
 Your device has been successfully received.
 
-Job ID : ${jobId}
+Job ID : ${result.jobId}
 Device : ${data.item}
 ${data.item} Name : ${data.deviceName}
 Accessories : ${data.accessories}
 Problem :
 ${data.problem}
-
 Status : Received
+
 Thank you for choosing RightClick.`
-    );
+      );
 
-    window.open(`https://wa.me/${num}?text=${waMsg}`,"_blank");
-    e.target.reset();
+      window.open(`https://wa.me/${num}?text=${waMsg}`, "_blank");
+      e.target.reset();
 
-  }catch(err){
-    msgBox.innerHTML = `<div class="error">❌ Error saving data</div>`;
+    } else {
+      msgBox.innerHTML = `<div class="error">❌ ${result.message}</div>`;
+    }
+
+  } catch (err) {
+    msgBox.innerHTML = `<div class="error">❌ API Connection Failed</div>`;
     console.error(err);
   }
 });
