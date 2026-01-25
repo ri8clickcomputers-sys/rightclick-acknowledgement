@@ -5,7 +5,6 @@
 <title>RightClick Job Acknowledgement</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
 <style>
 *{box-sizing:border-box;font-family:'Roboto',sans-serif}
 body{margin:0;background:#f5f8fb}
@@ -21,7 +20,6 @@ header img{
 }
 header h1{color:#fff;font-size:20px;margin:0}
 header p{color:#ffd700;margin:4px 0 0}
-
 main{
   max-width:520px;
   margin:20px auto;
@@ -30,9 +28,7 @@ main{
   border-radius:14px;
   box-shadow:0 4px 14px rgba(0,0,0,.1);
 }
-
 label{font-weight:500;margin-top:14px;display:block}
-
 input,select,textarea{
   width:100%;
   padding:12px;
@@ -41,7 +37,6 @@ input,select,textarea{
   border:1px solid #ccc;
   font-size:15px;
 }
-
 button{
   width:100%;
   margin-top:20px;
@@ -54,9 +49,7 @@ button{
   font-weight:600;
   cursor:pointer;
 }
-
 .hidden{display:none}
-
 .success{
   background:#e6ffe6;
   color:#006600;
@@ -65,7 +58,6 @@ button{
   margin-top:10px;
   text-align:center;
 }
-
 .error{
   background:#ffe6e6;
   color:#a00000;
@@ -76,7 +68,6 @@ button{
 }
 </style>
 </head>
-
 <body>
 
 <header>
@@ -124,14 +115,14 @@ button{
 <textarea id="problem" rows="3"></textarea>
 
 <button type="submit">Generate Acknowledgement</button>
-<div id="msgBox"></div>
 
+<div id="msgBox"></div>
 </form>
 </main>
 
 <script>
-// 🔗 YOUR NEW DEPLOYED API (cleaned single URL)
-const API_URL = "https://script.google.com/macros/s/AKfycbxXbEZ-DVeNWwHkqyKSJlcuPrVjXdXQAnfy8uri4FKV8c9Jy-uz7Efh6t0gR6KIhRgV/exec";
+/* 🔗 PUT YOUR APPS SCRIPT DEPLOYED URL HERE */
+const API_URL = "PASTE_YOUR_NEW_SCRIPT_URL_HERE";
 
 const item = document.getElementById("item");
 const deviceLabel = document.getElementById("deviceLabel");
@@ -156,6 +147,7 @@ document.getElementById("jobForm").addEventListener("submit", async e => {
     : accessories.value;
 
   const data = {
+    jobDate: jobDate.value,
     customerName: customerName.value,
     mobile: mobile.value,
     item: item.value,
@@ -175,6 +167,7 @@ document.getElementById("jobForm").addEventListener("submit", async e => {
     const result = await res.json();
 
     if (result.status === "success") {
+
       msgBox.innerHTML = `
         <div class="success">
           ✅ Job Created Successfully<br>
@@ -182,7 +175,6 @@ document.getElementById("jobForm").addEventListener("submit", async e => {
         </div>
       `;
 
-      // WhatsApp Message
       let num = data.mobile;
       if (!num.startsWith("91")) num = "91" + num;
 
@@ -192,12 +184,16 @@ Hello ${data.customerName},
 
 Your device has been successfully received.
 
-Job ID : ${result.jobId}
+Job Date : ${data.jobDate}
+Job ID   : ${result.jobId}
+
 Device : ${data.item}
 ${data.item} Name : ${data.deviceName}
 Accessories : ${data.accessories}
+
 Problem :
 ${data.problem}
+
 Status : Received
 
 Thank you for choosing RightClick.`
